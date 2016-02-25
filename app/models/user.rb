@@ -3,7 +3,7 @@ class User < ActiveRecord::Base
   before_save   :downcase_email
   before_create :create_activation_digest
 	
-  has_many :microposts
+  has_many :microposts, dependent: :destroy
 	before_save { self.email = email.downcase }
 	#VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
 	VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i
@@ -75,6 +75,11 @@ class User < ActiveRecord::Base
   end
   def password_reset_expired?
     reset_sent_at < 2.hours.ago
+  end
+  # Defines a proto-feed.
+  # See "Following users" for the full implementation.
+  def feed
+    Micropost.where("user_id = ?", id)
   end
   private
 
